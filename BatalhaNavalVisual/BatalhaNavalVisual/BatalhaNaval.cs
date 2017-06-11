@@ -337,6 +337,7 @@ namespace BatalhaNavalVisual
             {
                 ResultadoDeTiro tiroRes = tiroDado.Value;
                 Image tiro = tiroPreto;
+                Console.WriteLine("Tirores" + tiroRes);
                 switch (tiroRes)
                 {
                     case ResultadoDeTiro.Errou:
@@ -347,6 +348,9 @@ namespace BatalhaNavalVisual
                         break;
                     case ResultadoDeTiro.Afundou:
                         tiro = tiroPreto;
+                        break;
+                    default:
+                        Console.WriteLine(tiroRes + "");
                         break;
                 }
                 e.Graphics.DrawImage(tiro, tiroDado.Key.X * larguraF, tiroDado.Key.Y * alturaF, larguraF, alturaF);

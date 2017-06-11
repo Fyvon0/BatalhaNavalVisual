@@ -52,7 +52,7 @@ namespace BatalhaNaval
         /// Evento de tiro recebido
         /// </summary>
         public event EventoDeTiroRecebido OnTiroRecebido;
-
+        
         /// <summary>
         /// Mapa usado pelo cliente
         /// </summary>
