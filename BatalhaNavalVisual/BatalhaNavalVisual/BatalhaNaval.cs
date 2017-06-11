@@ -14,7 +14,7 @@ namespace BatalhaNavalVisual
 {
     public partial class BatalhaNaval : Form
     {
-        int x1, y1, x2, y2 = -1;
+        int x1, y1, x2, y2, tiroX, tiroY = -1;
         float larguraF, alturaF = 0F;
         TipoDeNavio navio = default(TipoDeNavio);
         Navios frmNavios;
@@ -41,7 +41,7 @@ namespace BatalhaNavalVisual
         private void Form1_Load(object sender, EventArgs e)
         {
             Nick frmNick = new Nick();
-            
+
             while (frmNick.ShowDialog(this) != DialogResult.OK)
                 MessageBox.Show("Por favor escolha um nick");
 
@@ -72,10 +72,10 @@ namespace BatalhaNavalVisual
                 Image img = Image.FromFile(navio.ToString() + ".png");
 
                 if (frmNavios.Direcao == 0)
-                { 
+                {
                     if (10 - navio.Tamanho() < y1)
                         y1 = 10 - navio.Tamanho();
-                    
+
                     e.Graphics.DrawImage(img, new RectangleF(larguraF * x1, alturaF * y1, larguraF, alturaF * navio.Tamanho()));
                 }
                 else
@@ -88,7 +88,7 @@ namespace BatalhaNavalVisual
                 }
             }
 
-            foreach (KeyValuePair<int[],TipoDeNavio> barco in tabuleiro.Navios)
+            foreach (KeyValuePair<int[], TipoDeNavio> barco in tabuleiro.Navios)
             {
                 if (barco.Key[2] == 0)
                     e.Graphics.DrawImage(Image.FromFile(barco.Value.ToString() + ".png"), new RectangleF(larguraF * barco.Key[0], alturaF * barco.Key[1], larguraF, alturaF * barco.Value.Tamanho()));
@@ -99,7 +99,7 @@ namespace BatalhaNavalVisual
                     e.Graphics.DrawImage(img, new RectangleF(larguraF * barco.Key[0], alturaF * barco.Key[1], larguraF * barco.Value.Tamanho(), alturaF));
                 }
             }
-            
+
             foreach (Tiro tiroRecebido in tirosRecebidos)
             {
                 ResultadoDeTiro tiroRes = tabuleiro.Atirar(tiroRecebido.X, tiroRecebido.Y);
@@ -110,7 +110,7 @@ namespace BatalhaNavalVisual
                         tiro = tiroVerde;
                         break;
                     case ResultadoDeTiro.Acertou:
-                       tiro = tiroVermelho;
+                        tiro = tiroVermelho;
                         break;
                     case ResultadoDeTiro.Afundou:
                         tiro = tiroPreto;
@@ -130,7 +130,7 @@ namespace BatalhaNavalVisual
         }
 
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
-        { 
+        {
             if (larguraF != 0)
             {
                 x1 = e.X / (int)(larguraF);
@@ -158,7 +158,7 @@ namespace BatalhaNavalVisual
             }
             else
                 if (10 - navio.Tamanho() < x1)
-                    x1 = 10 - navio.Tamanho();
+                x1 = 10 - navio.Tamanho();
 
             try
             {
@@ -185,6 +185,7 @@ namespace BatalhaNavalVisual
                 cliente.OnTiroRecebido += Cliente_OnTiroRecebido;
                 cliente.OnClienteDisponivel += Cliente_OnClienteDisponivel;
                 cliente.OnClienteIndisponivel += Cliente_OnClienteIndisponivel;
+                // cliente.OnFimDeJogo += Cliente_OnFimDeJogo;
                 cliente.Iniciar();
             }
             navio = default(TipoDeNavio);
@@ -243,7 +244,7 @@ namespace BatalhaNavalVisual
                 Invoke(new Action(() => { Cliente_OnClienteDisponivel(addr); }));
             else
             if (frmJogadores != null)
-                 frmJogadores.Adicionar(addr);
+                frmJogadores.Adicionar(addr);
         }
 
         private bool Cliente_OnClienteRequisitandoConexao(System.Net.IPAddress addr)
@@ -251,14 +252,14 @@ namespace BatalhaNavalVisual
             DialogResult r = DialogResult.No;
 
             Invoke(new Action(() => { r = MessageBox.Show(this, string.Format("{0} ({1}) quer jogar com você. Aceitar?", cliente.NomeRemoto, addr), "Batalha Naval", MessageBoxButtons.YesNo); }));
-            
+
             if (r == DialogResult.Yes)
                 return true;
             else
                 return false;
         }
 
-        private void Cliente_OnClienteDesconectado (IPAddress ip)
+        private void Cliente_OnClienteDesconectado(IPAddress ip)
         {
             Invoke(new Action(() =>
             {
@@ -274,7 +275,7 @@ namespace BatalhaNavalVisual
                 podeAtirar = true;
                 tempo = 31;
                 lblTempo.Text = tempo + "";
-                Console.WriteLine("sua vez"); 
+                Console.WriteLine("sua vez");
             }));
         }
 
@@ -283,7 +284,8 @@ namespace BatalhaNavalVisual
             Invoke(new Action(() =>
             {
                 Console.WriteLine("Atirô");
-                tirosDados.Add(t, resultado);
+                tirosDados.Add(new Tiro(tiroX,tiroY), resultado);
+                tiroX = tiroY = -1;
                 pictureBox1.Invalidate();
                 pictureBox2.Invalidate();
                 podeAtirar = false;
@@ -304,6 +306,19 @@ namespace BatalhaNavalVisual
             Invoke(new Action(() => { frmJogadores.Remover(addr); }));
         }
 
+        private void Cliente_OnFimDeJogo(bool ganhou)
+        {
+            Invoke(new Action(() =>
+            {
+                if (ganhou)
+                    MessageBox.Show("Parabéns!! Você ganhou! =D");
+                else
+                    MessageBox.Show("Ahh... Você perdeu... D=");
+
+                Reiniciar();
+            }));
+        }
+
         private void pictureBox2_Click(object sender, EventArgs e)
         {
             if (cliente == null)
@@ -312,7 +327,13 @@ namespace BatalhaNavalVisual
                 Invoke(new Action(() =>
                 {
                     if (podeAtirar)
+                    {
                         cliente.DarTiro(x2, y2);
+                        tiroX = x2;
+                        tiroY = y2;
+                        pictureBox2.Invalidate();
+                        podeAtirar = false;
+                    }
                 }));
         }
 
@@ -325,7 +346,7 @@ namespace BatalhaNavalVisual
             }
         }
 
-        private void Reiniciar ()
+        private void Reiniciar()
         {
             frmNavios = new Navios();
             frmNavios.Show(this);
@@ -375,6 +396,9 @@ namespace BatalhaNavalVisual
                 e.Graphics.DrawLine(new Pen(Color.Black, 2F), larguraF * i, 0, larguraF * i, (sender as PictureBox).Height - 1);
                 e.Graphics.DrawLine(new Pen(Color.Black, 2F), 0, alturaF * i, (sender as PictureBox).Width - 1, alturaF * i);
             }
+
+            if (tiroX != -1)
+                e.Graphics.DrawRectangle(new Pen(Color.Aquamarine, 2f), tiroX * larguraF, tiroY * alturaF, larguraF, alturaF);
 
             if (x2 != -1)
                 e.Graphics.DrawImage(miraVermelha, x2 * larguraF, y2 * alturaF, larguraF, alturaF);

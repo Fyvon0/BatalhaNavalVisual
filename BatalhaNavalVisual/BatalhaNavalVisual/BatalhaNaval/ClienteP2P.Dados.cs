@@ -31,6 +31,12 @@ namespace BatalhaNaval
         public delegate void EventoDeDarTiro();
 
         /// <summary>
+        /// Delegado para função de controle de evento de quando o jogo acaba
+        /// </summary>
+        /// <param name="ganhou">True se o jogador local tiver ganho e falso se tiver perdido</param>
+        public delegate void EventoDeFimDeJogo(bool ganhou);
+
+        /// <summary>
         /// Delegado para função de controle de evento de quando se recebe o resultado
         /// de um tiro dado
         /// </summary>
@@ -52,6 +58,11 @@ namespace BatalhaNaval
         /// Evento de tiro recebido
         /// </summary>
         public event EventoDeTiroRecebido OnTiroRecebido;
+
+        /// <summary>
+        /// Evento de fim de jogo
+        /// </summary>
+        public event EventoDeFimDeJogo OnFimDeJogo;
         
         /// <summary>
         /// Mapa usado pelo cliente
@@ -157,6 +168,9 @@ namespace BatalhaNaval
             TirosDados = new ListaDeTiros();
             TirosRecebidos = new ListaDeTiros();
 
+            int naviosAfundadosJogador = 0;
+            int naviosAfundadosOponente = 0;
+
             StreamReader reader = new StreamReader(cliente.GetStream());
 
             try
@@ -178,6 +192,9 @@ namespace BatalhaNaval
                     Tiro recebido = new Tiro(x, y);
 
                     // Avisa que recebeu o tiro para o cliente local
+                    if (!TirosRecebidos.Contains(recebido))
+                        if (recebido.Aplicar(Tabuleiro) == ResultadoDeTiro.Afundou)
+                            naviosAfundadosJogador++;
                     TirosRecebidos.Add(recebido, recebido.Aplicar(Tabuleiro));
                     OnTiroRecebido(recebido);
 
@@ -191,11 +208,22 @@ namespace BatalhaNaval
                     // Avisa o cliente do resultado do tiro
                     ResultadoDeTiro resultado = ResultadoDeTiro.Errou;
                     resultado = (ResultadoDeTiro)Convert.ToUInt32(line);
+                    if (!TirosDados.Contains(tiroDado))
+                        if (resultado == ResultadoDeTiro.Afundou)
+                            naviosAfundadosOponente++;
                     TirosDados.Add(tiroDado, resultado);
                     OnResultadoDeTiro(tiroDado, resultado);
-
-
-                    _tiro = null;
+                    
+                    if (naviosAfundadosOponente >= 5)
+                    {
+                        OnFimDeJogo(true);
+                        break;
+                    }
+                    if (naviosAfundadosJogador >= 5)
+                    {
+                        OnFimDeJogo(false);
+                        break;
+                    }
 
                     waitHandle.Reset();
                 }
