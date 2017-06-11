@@ -24,3 +24,4 @@ E:\Técnico\Programação Visual\BatalhaNavalVisual\BatalhaNavalVisual\obj\Debug
 E:\Técnico\Programação Visual\BatalhaNavalVisual\BatalhaNavalVisual\obj\Debug\BatalhaNavalVisual.Properties.Resources.resources
 E:\Técnico\Programação Visual\BatalhaNavalVisual\BatalhaNavalVisual\obj\Debug\BatalhaNavalVisual.csproj.GenerateResource.Cache
 F:\Técnico\Programação Visual\BatalhaNavalVisual\BatalhaNavalVisual\obj\Debug\BatalhaNavalVisual.Jogadores.resources
+F:\Técnico\Programação Visual\BatalhaNavalVisual\BatalhaNavalVisual\obj\Debug\BatalhaNavalVisual.Regras.resources

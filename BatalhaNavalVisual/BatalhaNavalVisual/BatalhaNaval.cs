@@ -20,6 +20,7 @@ namespace BatalhaNavalVisual
         Navios frmNavios;
         Tabuleiro tabuleiro;
         Jogadores frmJogadores;
+        Regras frmRegras;
         Image miraVerde = Image.FromFile("miraverde.png");
         Image miraVermelha = Image.FromFile("miravermelha.png");
         ClienteP2P cliente;
@@ -28,7 +29,7 @@ namespace BatalhaNavalVisual
         Image tiroVerde = Image.FromFile("xisVerde.png");
         Image tiroVermelho = Image.FromFile("xisVermelho.png");
         Image tiroPreto = Image.FromFile("xisPreto.png");
-        int tempo = 30;
+        int tempo = 31;
         bool podeAtirar = false;
 
 
@@ -49,6 +50,11 @@ namespace BatalhaNavalVisual
 
             frmNavios = new Navios();
             frmNavios.Show(this);
+
+            this.WindowState = FormWindowState.Maximized;
+
+            frmRegras = new Regras();
+            frmRegras.Show(this);
 
             tabuleiro = new Tabuleiro();
 
@@ -169,7 +175,7 @@ namespace BatalhaNavalVisual
                 cliente = new ClienteP2P(lblJogador.Text, tabuleiro);
                 frmJogadores = new Jogadores();
                 frmJogadores.btnConectar.Click += BtnConectar_Click;
-                frmJogadores.Show();
+                frmJogadores.Show(this);
                 cliente.OnClienteDisponivel += Cliente_OnClienteDisponivel;
                 cliente.OnClienteRequisitandoConexao += Cliente_OnClienteRequisitandoConexao;
                 cliente.OnClienteConectado += Cliente_OnClienteConectado;
@@ -266,9 +272,9 @@ namespace BatalhaNavalVisual
             Invoke(new Action(() =>
             {
                 podeAtirar = true;
-                tempo = 30;
+                tempo = 31;
                 lblTempo.Text = tempo + "";
-                MessageBox.Show("sua vez"); 
+                Console.WriteLine("sua vez"); 
             }));
         }
 
@@ -276,8 +282,10 @@ namespace BatalhaNavalVisual
         {
             Invoke(new Action(() =>
             {
-                MessageBox.Show("Atirô");
+                Console.WriteLine("Atirô");
                 tirosDados.Add(t, resultado);
+                pictureBox1.Invalidate();
+                pictureBox2.Invalidate();
                 podeAtirar = false;
             }));
         }
@@ -286,7 +294,7 @@ namespace BatalhaNavalVisual
         {
             Invoke(new Action(() =>
             {
-                MessageBox.Show("tomou tiro");
+                Console.WriteLine("tomou tiro");
                 tirosRecebidos.Add(t);
             }));
         }
@@ -310,8 +318,11 @@ namespace BatalhaNavalVisual
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            tempo--;
-            lblTempo.Text = tempo + "";
+            if (tempo > 0)
+            {
+                tempo--;
+                lblTempo.Text = tempo + "";
+            }
         }
 
         private void Reiniciar ()
@@ -348,6 +359,9 @@ namespace BatalhaNavalVisual
                         break;
                     case ResultadoDeTiro.Afundou:
                         tiro = tiroPreto;
+                        break;
+                    case ResultadoDeTiro.Ganhou:
+                        MessageBox.Show("Ganhou Miserávi");
                         break;
                     default:
                         Console.WriteLine(tiroRes + "");

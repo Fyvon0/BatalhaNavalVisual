@@ -163,11 +163,8 @@ namespace BatalhaNaval
                 int x = Convert.ToInt32(line.Substring(5, line.IndexOf(',') - 5));
                 int y = Convert.ToInt32(line.Substring(line.IndexOf(',') + 1));
 
-                Console.WriteLine(line);
-
                 recebido = new Tiro(x, y);
             }
-            Console.WriteLine(line);
 
             return recebido;
         }
